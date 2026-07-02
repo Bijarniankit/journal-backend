@@ -1,0 +1,25 @@
+// ─── Trading Journal — Prisma Schema ─────────────────────
+// Phase 0: Profile + Auth foundation
+// This schema grows incrementally each phase.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─── Phase 0: Profile ────────────────────────────────────
+
+model Profile {
+  id              String   @id                        // = Supabase auth.users.id
+  email           String   @unique
+  displayName     String?
+  timezone        String   @default("UTC")
+  baseCurrency    String   @default("INR")            // ISO 4217
+  startingBalance Decimal  @default(0)                // offsets the cumulative-P&L equity curve
+  createdAt       DateTime @default(now())
+}
