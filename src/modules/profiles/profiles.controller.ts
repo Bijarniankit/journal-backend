@@ -1,7 +1,11 @@
 import { Controller, Get, Patch, Body } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { ProfilesService } from './profiles.service';
-import { CurrentUser, AuthUser } from '../../common/decorators';
+import { CurrentUser } from '../../common/decorators';
+import type { AuthUser } from '../../common/decorators';
 
+@ApiTags('Profile')
+@ApiBearerAuth('supabase-jwt')
 @Controller('me')
 export class ProfilesController {
   constructor(private readonly profilesService: ProfilesService) {}

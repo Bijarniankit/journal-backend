@@ -1,0 +1,66 @@
+[
+  {
+    "description": "Standard LONG winning trade",
+    "trade": {
+      "symbol": "AAPL",
+      "assetClass": "EQUITY",
+      "direction": "LONG",
+      "entryPrice": 150,
+      "exitPrice": 160,
+      "quantity": 100,
+      "stopLoss": 145,
+      "takeProfit": 165,
+      "currency": "USD",
+      "openedAt": "2026-07-01T10:00:00Z",
+      "closedAt": "2026-07-01T14:00:00Z"
+    },
+    "expectedMetrics": {
+      "netPnl": 1000, 
+      "netPnlBase": 1000, 
+      "plannedRiskReward": 3
+    }
+  },
+  {
+    "description": "SHORT losing trade with missing StopLoss (null RR)",
+    "trade": {
+      "symbol": "TSLA",
+      "assetClass": "EQUITY",
+      "direction": "SHORT",
+      "entryPrice": 200,
+      "exitPrice": 220,
+      "quantity": 50,
+      "stopLoss": null,
+      "takeProfit": 150,
+      "currency": "USD",
+      "openedAt": "2026-07-02T10:00:00Z",
+      "closedAt": "2026-07-02T11:00:00Z"
+    },
+    "expectedMetrics": {
+      "netPnl": -1000, 
+      "netPnlBase": -1000, 
+      "plannedRiskReward": null
+    }
+  },
+  {
+    "description": "Non-base currency trade (e.g. trading EUR/USD while base is INR)",
+    "trade": {
+      "symbol": "EUR/USD",
+      "assetClass": "FOREX",
+      "direction": "LONG",
+      "entryPrice": 1.1000,
+      "exitPrice": 1.1050,
+      "quantity": 100000,
+      "stopLoss": 1.0950,
+      "takeProfit": 1.1150,
+      "currency": "USD",
+      "openedAt": "2026-07-03T08:00:00Z",
+      "closedAt": "2026-07-03T12:00:00Z"
+    },
+    "mockFxToBase": 84.50,
+    "expectedMetrics": {
+      "netPnl": 500, 
+      "netPnlBase": 42250, 
+      "plannedRiskReward": 3 
+    }
+  }
+]

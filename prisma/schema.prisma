@@ -23,3 +23,85 @@ model Profile {
   startingBalance Decimal  @default(0)                // offsets the cumulative-P&L equity curve
   createdAt       DateTime @default(now())
 }
+
+// ─── Phase 1: Trade Journal Core ─────────────────────────
+
+enum AssetClass {
+  EQUITY
+  OPTION
+  FUTURE
+  FOREX
+  CRYPTO
+}
+
+enum TradeDirection {
+  LONG
+  SHORT
+}
+
+enum TradeSource {
+  MANUAL
+  IMPORT
+  SNAPTRADE
+}
+
+model Trade {
+  id                String         @id @default(uuid())
+  userId            String
+  symbol            String
+  assetClass        AssetClass
+  entryPrice        Decimal
+  exitPrice         Decimal?
+  quantity          Decimal
+  direction         TradeDirection
+  stopLoss          Decimal?
+  takeProfit        Decimal?
+  currency          String
+  fxToBase          Decimal        @default(1)
+  openedAt          DateTime
+  closedAt          DateTime?
+  notes             String?
+  netPnl            Decimal?
+  netPnlBase        Decimal?
+  plannedRiskReward Decimal?
+  strategyId        String?
+  source            TradeSource
+  externalId        String?
+  createdAt         DateTime       @default(now())
+
+  strategy          Strategy?      @relation(fields: [strategyId], references: [id])
+  tags              TradeTag[]
+
+  @@unique([userId, source, externalId])
+  @@index([userId, openedAt])
+  @@index([userId, strategyId])
+}
+
+model Strategy {
+  id        String   @id @default(uuid())
+  userId    String
+  name      String
+  trades    Trade[]
+  createdAt DateTime @default(now())
+
+  @@unique([userId, name])
+}
+
+model Tag {
+  id        String     @id @default(uuid())
+  userId    String
+  name      String
+  trades    TradeTag[]
+  createdAt DateTime   @default(now())
+
+  @@unique([userId, name])
+}
+
+model TradeTag {
+  tradeId   String
+  tagId     String
+  trade     Trade    @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([tradeId, tagId])
+}

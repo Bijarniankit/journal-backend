@@ -6,6 +6,9 @@ import { BullModule } from '@nestjs/bullmq';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ProfilesModule } from './modules/profiles/profiles.module';
+import { TradesModule } from './modules/trades/trades.module';
+import { StrategiesModule } from './modules/strategies/strategies.module';
+import { TagsModule } from './modules/tags/tags.module';
 
 @Module({
   imports: [
@@ -44,6 +47,9 @@ import { ProfilesModule } from './modules/profiles/profiles.module';
     // ─── Feature Modules ───────────────────────────────────
     AuthModule,
     ProfilesModule,
+    TradesModule,
+    StrategiesModule,
+    TagsModule,
   ],
   providers: [
     // Global rate-limit guard

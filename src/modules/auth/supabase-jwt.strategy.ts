@@ -4,7 +4,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
 export interface JwtPayload {
-  sub: string;  // Supabase user ID
+  sub: string; // Supabase user ID
   email: string;
   aud: string;
   role: string;

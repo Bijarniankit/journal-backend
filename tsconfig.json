@@ -19,6 +19,8 @@
     "strictBindCallApply": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
     "types": ["node", "jest"],
     "typeRoots": ["./node_modules/@types"],
     "paths": {

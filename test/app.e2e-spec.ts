@@ -20,8 +20,6 @@ describe('AppController (e2e)', () => {
   });
 
   it('/me (GET) — should reject unauthenticated requests', () => {
-    return request(app.getHttpServer())
-      .get('/me')
-      .expect(401);
+    return request(app.getHttpServer()).get('/me').expect(401);
   });
 });
