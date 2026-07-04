@@ -11,7 +11,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiConsumes, ApiBody, ApiOperation } from '@nestjs/swagger';
 import { ImportsService } from './imports.service';
 import {
   CreateMappingTemplateDto,
@@ -35,6 +35,10 @@ export class ImportsController {
   // ─── Import Endpoints ──────────────────────────────────
 
   @Post('imports')
+  @ApiOperation({
+    summary: 'Upload and process a trade file (CSV/Excel)',
+    description: 'Uploads a CSV or Excel file containing trade data. The file is parsed and each row is mapped to trade properties using either a provided JSON `columnMapping` or a saved `mappingTemplateId`. Duplicate trades are silently skipped based on a hash of symbol, date, quantity, and price.',
+  })
   @UseInterceptors(
     FileInterceptor('file', {
       limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB max
@@ -102,11 +106,19 @@ export class ImportsController {
   }
 
   @Get('imports')
+  @ApiOperation({
+    summary: 'List import history',
+    description: 'Retrieves a list of all file imports performed by the user, including their success/failure counts and any row-level errors.',
+  })
   findAll(@Request() req: any) {
     return this.importsService.findAll(req.user.id);
   }
 
   @Get('imports/:id')
+  @ApiOperation({
+    summary: 'Get import details',
+    description: 'Retrieves detailed information about a specific file import session by its ID.',
+  })
   findOne(@Request() req: any, @Param('id') id: string) {
     return this.importsService.findOne(req.user.id, id);
   }
@@ -114,6 +126,10 @@ export class ImportsController {
   // ─── Mapping Template Endpoints ────────────────────────
 
   @Post('mapping-templates')
+  @ApiOperation({
+    summary: 'Create a mapping template',
+    description: 'Saves a column mapping configuration so it can be reused for future CSV/Excel imports from the same broker.',
+  })
   createTemplate(
     @Request() req: any,
     @Body() dto: CreateMappingTemplateDto,
@@ -122,11 +138,19 @@ export class ImportsController {
   }
 
   @Get('mapping-templates')
+  @ApiOperation({
+    summary: 'List mapping templates',
+    description: 'Retrieves all saved broker column mapping templates for the user.',
+  })
   findAllTemplates(@Request() req: any) {
     return this.importsService.findAllTemplates(req.user.id);
   }
 
   @Delete('mapping-templates/:id')
+  @ApiOperation({
+    summary: 'Delete a mapping template',
+    description: 'Deletes a saved mapping template by its ID.',
+  })
   deleteTemplate(@Request() req: any, @Param('id') id: string) {
     return this.importsService.deleteTemplate(req.user.id, id);
   }
