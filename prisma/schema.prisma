@@ -71,6 +71,10 @@ model Trade {
 
   strategy          Strategy?      @relation(fields: [strategyId], references: [id])
   tags              TradeTag[]
+  screenshots       TradeScreenshot[]
+  
+  accountId         String?
+  account           BrokerageAccount? @relation(fields: [accountId], references: [id])
 
   @@unique([userId, source, externalId])
   @@index([userId, openedAt])
@@ -105,3 +109,174 @@ model TradeTag {
 
   @@id([tradeId, tagId])
 }
+
+// ─── Phase 2: CSV/Excel Import & Screenshots ────────────
+
+enum ImportStatus {
+  PENDING
+  PROCESSING
+  DONE
+  FAILED
+}
+
+enum ScreenshotLabel {
+  BEFORE
+  AFTER
+}
+
+model Import {
+  id                String       @id @default(uuid())
+  userId            String
+  status            ImportStatus @default(PENDING)
+  fileName          String?
+  totalRows         Int          @default(0)
+  successCount      Int          @default(0)
+  errorCount        Int          @default(0)
+  skippedCount      Int          @default(0)      // duplicates skipped
+  rowErrors         Json         @default("[]")    // [{ row, field, message }]
+  notices           Json         @default("[]")    // assumptions (e.g. "defaulted currency to INR")
+  mappingTemplateId String?
+  mappingTemplate   MappingTemplate? @relation(fields: [mappingTemplateId], references: [id])
+  createdAt         DateTime     @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model MappingTemplate {
+  id        String   @id @default(uuid())
+  userId    String
+  name      String
+  columnMap Json                                   // { "fileColumn": "tradeField", ... }
+  imports   Import[]
+  createdAt DateTime @default(now())
+
+  @@unique([userId, name])
+}
+
+model TradeScreenshot {
+  id          String          @id @default(uuid())
+  tradeId     String
+  trade       Trade           @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  storagePath String
+  label       ScreenshotLabel
+  createdAt   DateTime        @default(now())
+
+  @@index([tradeId])
+}
+
+// ─── Phase 2.5: SnapTrade Foundation ────────────────────
+
+model BrokerageConnection {
+  id              String   @id @default(uuid()) // Can use SnapTrade's brokerage_authorization ID
+  userId          String
+  institutionName String
+  status          String   @default("ACTIVE") // ACTIVE, DISCONNECTED
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  accounts        BrokerageAccount[]
+  
+  @@index([userId])
+}
+
+model BrokerageAccount {
+  id               String   @id // SnapTrade account ID (UUID)
+  userId           String
+  connectionId     String
+  name             String?
+  number           String
+  institutionName  String
+  balance          Decimal?
+  currency         String?
+  status           String?
+  category         String?  // INVESTMENT, DEPOSIT
+  isPaper          Boolean  @default(false)
+  syncStatus       Json     @default("{}") // Store initial_sync_completed, last_successful_sync
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  connection       BrokerageConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  activities       BrokerageActivity[]
+  positions        BrokeragePosition[]
+  orders           BrokerageOrder[]
+  trades           Trade[] // Link rolled-up journal trades to this account
+
+  @@index([userId])
+  @@index([connectionId])
+}
+
+model BrokerageActivity {
+  id                  String   @id // SnapTrade activity ID
+  userId              String
+  accountId           String
+  symbol              String?  // null for cash deposits/withdrawals
+  assetClass          AssetClass? 
+  type                String   // BUY, SELL, DIVIDEND, FEE, etc.
+  optionType          String?  // BUY_TO_OPEN, etc
+  price               Decimal?
+  units               Decimal?
+  amount              Decimal? // signed cash impact
+  fee                 Decimal?
+  currency            String?
+  fxRate              Decimal?
+  description         String?
+  tradeDate           DateTime?
+  settlementDate      DateTime?
+  externalReferenceId String?
+  isProcessed         Boolean  @default(false) // true when rolled up into a Trade
+  createdAt           DateTime @default(now())
+
+  account             BrokerageAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([accountId, tradeDate])
+}
+
+model BrokeragePosition {
+  id               String   @id @default(uuid())
+  userId           String
+  accountId        String
+  symbol           String
+  assetClass       AssetClass
+  units            Decimal
+  averagePrice     Decimal?
+  currentPrice     Decimal?
+  openPnl          Decimal?
+  currency         String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  account          BrokerageAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@unique([accountId, symbol])
+  @@index([userId])
+}
+
+model BrokerageOrder {
+  id               String   @id // brokerage_order_id
+  userId           String
+  accountId        String
+  symbol           String?
+  assetClass       AssetClass?
+  action           String   // BUY, SELL, etc
+  status           String   // PENDING, EXECUTED, CANCELED, etc
+  totalQuantity    Decimal?
+  openQuantity     Decimal?
+  filledQuantity   Decimal?
+  executionPrice   Decimal?
+  limitPrice       Decimal?
+  stopPrice        Decimal?
+  orderType        String?  // Limit, Market, Stop
+  timeInForce      String?
+  timePlaced       DateTime
+  timeExecuted     DateTime?
+  timeUpdated      DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  account          BrokerageAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([accountId, status])
+}
+

@@ -1,0 +1,4 @@
+-- This is a baseline migration.
+-- The Phase 0 + Phase 1 schema was applied directly to Supabase.
+-- This file is intentionally empty so Prisma treats the existing DB state as the baseline.
+-- Phase 2 changes (Import, MappingTemplate, TradeScreenshot) will be applied in the next migration.

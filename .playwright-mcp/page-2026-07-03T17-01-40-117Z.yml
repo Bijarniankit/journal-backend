@@ -1,0 +1,410 @@
+- generic [active] [ref=f1e1]:
+  - img
+  - generic [ref=f1e3]:
+    - generic [ref=f1e6]:
+      - img [ref=f1e8]
+      - button [ref=f1e44] [cursor=pointer]:
+        - img [ref=f1e45]
+    - generic [ref=f1e47]:
+      - generic:
+        - img
+      - generic [ref=f1e48]:
+        - generic [ref=f1e52]:
+          - heading "Trading Journal API 0.1.0 OAS 3.0" [level=1] [ref=f1e54]:
+            - text: Trading Journal API
+            - generic [ref=f1e55]:
+              - generic [ref=f1e57]: 0.1.0
+              - generic [ref=f1e59]: OAS 3.0
+          - paragraph [ref=f1e62]: REST API for the Trading Journal application. All endpoints require a valid Supabase JWT unless marked as public.
+        - button "Authorize" [ref=f1e66] [cursor=pointer]:
+          - generic [ref=f1e67]: Authorize
+          - img [ref=f1e68]
+        - generic [ref=f1e72]:
+          - generic [ref=f1e74]:
+            - heading "Profile Collapse operation" [level=3] [ref=f1e75] [cursor=pointer]:
+              - link "Profile" [ref=f1e76]:
+                - /url: "#/Profile"
+              - button "Collapse operation" [expanded] [ref=f1e77]:
+                - img [ref=f1e78]
+            - generic [ref=f1e81]:
+              - generic [ref=f1e84] [cursor=pointer]:
+                - button "GET /me" [ref=f1e85]:
+                  - generic [ref=f1e86]: GET
+                  - link "/me" [ref=f1e89]:
+                    - /url: "#/Profile/ProfilesController_getMe"
+                - generic "Copy to clipboard"
+                - button "authorization button unlocked" [ref=f1e92]:
+                  - img [ref=f1e93]
+                - button "get /me" [ref=f1e95]:
+                  - img [ref=f1e96]
+              - generic [ref=f1e100] [cursor=pointer]:
+                - button "PATCH /me" [ref=f1e101]:
+                  - generic [ref=f1e102]: PATCH
+                  - link "/me" [ref=f1e105]:
+                    - /url: "#/Profile/ProfilesController_updateMe"
+                - generic "Copy to clipboard"
+                - button "authorization button unlocked" [ref=f1e108]:
+                  - img [ref=f1e109]
+                - button "patch /me" [ref=f1e111]:
+                  - img [ref=f1e112]
+          - generic [ref=f1e115]:
+            - heading "Trades Collapse operation" [level=3] [ref=f1e116] [cursor=pointer]:
+              - link "Trades" [ref=f1e117]:
+                - /url: "#/Trades"
+              - button "Collapse operation" [expanded] [ref=f1e118]:
+                - img [ref=f1e119]
+            - generic [ref=f1e122]:
+              - generic [ref=f1e125] [cursor=pointer]:
+                - button "POST /trades" [ref=f1e126]:
+                  - generic [ref=f1e127]: POST
+                  - link "/trades" [ref=f1e130]:
+                    - /url: "#/Trades/TradesController_create"
+                - generic "Copy to clipboard"
+                - button "authorization button unlocked" [ref=f1e133]:
+                  - img [ref=f1e134]
+                - button "post /trades" [ref=f1e136]:
+                  - img [ref=f1e137]
+              - generic [ref=f1e141] [cursor=pointer]:
+                - button "GET /trades" [ref=f1e142]:
+                  - generic [ref=f1e143]: GET
+                  - link "/trades" [ref=f1e146]:
+                    - /url: "#/Trades/TradesController_findAll"
+                - generic "Copy to clipboard"
+                - button "authorization button unlocked" [ref=f1e149]:
+                  - img [ref=f1e150]
+                - button "get /trades" [ref=f1e152]:
+                  - img [ref=f1e153]
+              - generic [ref=f1e157] [cursor=pointer]:
+                - 'button "GET /trades/{id}" [ref=f1e158]':
+                  - generic [ref=f1e159]: GET
+                  - 'link "/trades/{id}" [ref=f1e162]':
+                    - /url: "#/Trades/TradesController_findOne"
+                    - generic [ref=f1e163]:
+                      - text: /trades
+                      - text: "/{id}"
+                - generic "Copy to clipboard"
+                - button "authorization button unlocked" [ref=f1e166]:
+                  - img [ref=f1e167]
+                - 'button "get /trades/{id}" [ref=f1e169]':
+                  - img [ref=f1e170]
+              - generic [ref=f1e174] [cursor=pointer]:
+                - 'button "PATCH /trades/{id}" [ref=f1e175]':
+                  - generic [ref=f1e176]: PATCH
+                  - 'link "/trades/{id}" [ref=f1e179]':
+                    - /url: "#/Trades/TradesController_update"
+                    - generic [ref=f1e180]:
+                      - text: /trades
+                      - text: "/{id}"
+                - generic "Copy to clipboard"
+                - button "authorization button unlocked" [ref=f1e183]:
+                  - img [ref=f1e184]
+                - 'button "patch /trades/{id}" [ref=f1e186]':
+                  - img [ref=f1e187]
+              - generic [ref=f1e191] [cursor=pointer]:
+                - 'button "DELETE /trades/{id}" [ref=f1e192]':
+                  - generic [ref=f1e193]: DELETE
+                  - 'link "/trades/{id}" [ref=f1e196]':
+                    - /url: "#/Trades/TradesController_remove"
+                    - generic [ref=f1e197]:
+                      - text: /trades
+                      - text: "/{id}"
+                - generic "Copy to clipboard"
+                - button "authorization button unlocked" [ref=f1e200]:
+                  - img [ref=f1e201]
+                - 'button "delete /trades/{id}" [ref=f1e203]':
+                  - img [ref=f1e204]
+          - generic [ref=f1e207]:
+            - heading "Screenshots Collapse operation" [level=3] [ref=f1e208] [cursor=pointer]:
+              - link "Screenshots" [ref=f1e209]:
+                - /url: "#/Screenshots"
+              - button "Collapse operation" [expanded] [ref=f1e210]:
+                - img [ref=f1e211]
+            - generic [ref=f1e214]:
+              - generic [ref=f1e217] [cursor=pointer]:
+                - 'button "POST /trades/{tradeId}/screenshots/presign" [ref=f1e218]':
+                  - generic [ref=f1e219]: POST
+                  - 'link "/trades/{tradeId}/screenshots/presign" [ref=f1e222]':
+                    - /url: "#/Screenshots/ScreenshotsController_presign"
+                    - generic [ref=f1e223]:
+                      - text: /trades
+                      - text: "/{tradeId}"
+                      - text: /screenshots
+                      - text: /presign
+                - generic "Copy to clipboard"
+                - button "authorization button unlocked" [ref=f1e226]:
+                  - img [ref=f1e227]
+                - 'button "post /trades/{tradeId}/screenshots/presign" [ref=f1e229]':
+                  - img [ref=f1e230]
+              - generic [ref=f1e234] [cursor=pointer]:
+                - 'button "POST /trades/{tradeId}/screenshots/confirm" [ref=f1e235]':
+                  - generic [ref=f1e236]: POST
+                  - 'link "/trades/{tradeId}/screenshots/confirm" [ref=f1e239]':
+                    - /url: "#/Screenshots/ScreenshotsController_confirm"
+                    - generic [ref=f1e240]:
+                      - text: /trades
+                      - text: "/{tradeId}"
+                      - text: /screenshots
+                      - text: /confirm
+                - generic "Copy to clipboard"
+                - button "authorization button unlocked" [ref=f1e243]:
+                  - img [ref=f1e244]
+                - 'button "post /trades/{tradeId}/screenshots/confirm" [ref=f1e246]':
+                  - img [ref=f1e247]
+              - generic [ref=f1e251] [cursor=pointer]:
+                - 'button "GET /trades/{tradeId}/screenshots" [ref=f1e252]':
+                  - generic [ref=f1e253]: GET
+                  - 'link "/trades/{tradeId}/screenshots" [ref=f1e256]':
+                    - /url: "#/Screenshots/ScreenshotsController_findAll"
+                    - generic [ref=f1e257]:
+                      - text: /trades
+                      - text: "/{tradeId}"
+                      - text: /screenshots
+                - generic "Copy to clipboard"
+                - button "authorization button unlocked" [ref=f1e260]:
+                  - img [ref=f1e261]
+                - 'button "get /trades/{tradeId}/screenshots" [ref=f1e263]':
+                  - img [ref=f1e264]
+              - generic [ref=f1e268] [cursor=pointer]:
+                - 'button "DELETE /trades/{tradeId}/screenshots/{screenshotId}" [ref=f1e269]':
+                  - generic [ref=f1e270]: DELETE
+                  - 'link "/trades/{tradeId}/screenshots/{screenshotId}" [ref=f1e273]':
+                    - /url: "#/Screenshots/ScreenshotsController_remove"
+                    - generic [ref=f1e274]:
+                      - text: /trades
+                      - text: "/{tradeId}"
+                      - text: /screenshots
+                      - text: "/{screenshotId}"
+                - generic "Copy to clipboard"
+                - button "authorization button unlocked" [ref=f1e277]:
+                  - img [ref=f1e278]
+                - 'button "delete /trades/{tradeId}/screenshots/{screenshotId}" [ref=f1e280]':
+                  - img [ref=f1e281]
+          - generic [ref=f1e284]:
+            - heading "Strategies Collapse operation" [level=3] [ref=f1e285] [cursor=pointer]:
+              - link "Strategies" [ref=f1e286]:
+                - /url: "#/Strategies"
+              - button "Collapse operation" [expanded] [ref=f1e287]:
+                - img [ref=f1e288]
+            - generic [ref=f1e291]:
+              - generic [ref=f1e294] [cursor=pointer]:
+                - button "POST /strategies" [ref=f1e295]:
+                  - generic [ref=f1e296]: POST
+                  - link "/strategies" [ref=f1e299]:
+                    - /url: "#/Strategies/StrategiesController_create"
+                - generic "Copy to clipboard"
+                - button "authorization button unlocked" [ref=f1e302]:
+                  - img [ref=f1e303]
+                - button "post /strategies" [ref=f1e305]:
+                  - img [ref=f1e306]
+              - generic [ref=f1e310] [cursor=pointer]:
+                - button "GET /strategies" [ref=f1e311]:
+                  - generic [ref=f1e312]: GET
+                  - link "/strategies" [ref=f1e315]:
+                    - /url: "#/Strategies/StrategiesController_findAll"
+                - generic "Copy to clipboard"
+                - button "authorization button unlocked" [ref=f1e318]:
+                  - img [ref=f1e319]
+                - button "get /strategies" [ref=f1e321]:
+                  - img [ref=f1e322]
+              - generic [ref=f1e326] [cursor=pointer]:
+                - 'button "GET /strategies/{id}" [ref=f1e327]':
+                  - generic [ref=f1e328]: GET
+                  - 'link "/strategies/{id}" [ref=f1e331]':
+                    - /url: "#/Strategies/StrategiesController_findOne"
+                    - generic [ref=f1e332]:
+                      - text: /strategies
+                      - text: "/{id}"
+                - generic "Copy to clipboard"
+                - button "authorization button unlocked" [ref=f1e335]:
+                  - img [ref=f1e336]
+                - 'button "get /strategies/{id}" [ref=f1e338]':
+                  - img [ref=f1e339]
+              - generic [ref=f1e343] [cursor=pointer]:
+                - 'button "PATCH /strategies/{id}" [ref=f1e344]':
+                  - generic [ref=f1e345]: PATCH
+                  - 'link "/strategies/{id}" [ref=f1e348]':
+                    - /url: "#/Strategies/StrategiesController_update"
+                    - generic [ref=f1e349]:
+                      - text: /strategies
+                      - text: "/{id}"
+                - generic "Copy to clipboard"
+                - button "authorization button unlocked" [ref=f1e352]:
+                  - img [ref=f1e353]
+                - 'button "patch /strategies/{id}" [ref=f1e355]':
+                  - img [ref=f1e356]
+              - generic [ref=f1e360] [cursor=pointer]:
+                - 'button "DELETE /strategies/{id}" [ref=f1e361]':
+                  - generic [ref=f1e362]: DELETE
+                  - 'link "/strategies/{id}" [ref=f1e365]':
+                    - /url: "#/Strategies/StrategiesController_remove"
+                    - generic [ref=f1e366]:
+                      - text: /strategies
+                      - text: "/{id}"
+                - generic "Copy to clipboard"
+                - button "authorization button unlocked" [ref=f1e369]:
+                  - img [ref=f1e370]
+                - 'button "delete /strategies/{id}" [ref=f1e372]':
+                  - img [ref=f1e373]
+          - generic [ref=f1e376]:
+            - heading "Tags Collapse operation" [level=3] [ref=f1e377] [cursor=pointer]:
+              - link "Tags" [ref=f1e378]:
+                - /url: "#/Tags"
+              - button "Collapse operation" [expanded] [ref=f1e379]:
+                - img [ref=f1e380]
+            - generic [ref=f1e383]:
+              - generic [ref=f1e386] [cursor=pointer]:
+                - button "POST /tags" [ref=f1e387]:
+                  - generic [ref=f1e388]: POST
+                  - link "/tags" [ref=f1e391]:
+                    - /url: "#/Tags/TagsController_create"
+                - generic "Copy to clipboard"
+                - button "authorization button unlocked" [ref=f1e394]:
+                  - img [ref=f1e395]
+                - button "post /tags" [ref=f1e397]:
+                  - img [ref=f1e398]
+              - generic [ref=f1e402] [cursor=pointer]:
+                - button "GET /tags" [ref=f1e403]:
+                  - generic [ref=f1e404]: GET
+                  - link "/tags" [ref=f1e407]:
+                    - /url: "#/Tags/TagsController_findAll"
+                - generic "Copy to clipboard"
+                - button "authorization button unlocked" [ref=f1e410]:
+                  - img [ref=f1e411]
+                - button "get /tags" [ref=f1e413]:
+                  - img [ref=f1e414]
+              - generic [ref=f1e418] [cursor=pointer]:
+                - 'button "GET /tags/{id}" [ref=f1e419]':
+                  - generic [ref=f1e420]: GET
+                  - 'link "/tags/{id}" [ref=f1e423]':
+                    - /url: "#/Tags/TagsController_findOne"
+                    - generic [ref=f1e424]:
+                      - text: /tags
+                      - text: "/{id}"
+                - generic "Copy to clipboard"
+                - button "authorization button unlocked" [ref=f1e427]:
+                  - img [ref=f1e428]
+                - 'button "get /tags/{id}" [ref=f1e430]':
+                  - img [ref=f1e431]
+              - generic [ref=f1e435] [cursor=pointer]:
+                - 'button "PATCH /tags/{id}" [ref=f1e436]':
+                  - generic [ref=f1e437]: PATCH
+                  - 'link "/tags/{id}" [ref=f1e440]':
+                    - /url: "#/Tags/TagsController_update"
+                    - generic [ref=f1e441]:
+                      - text: /tags
+                      - text: "/{id}"
+                - generic "Copy to clipboard"
+                - button "authorization button unlocked" [ref=f1e444]:
+                  - img [ref=f1e445]
+                - 'button "patch /tags/{id}" [ref=f1e447]':
+                  - img [ref=f1e448]
+              - generic [ref=f1e452] [cursor=pointer]:
+                - 'button "DELETE /tags/{id}" [ref=f1e453]':
+                  - generic [ref=f1e454]: DELETE
+                  - 'link "/tags/{id}" [ref=f1e457]':
+                    - /url: "#/Tags/TagsController_remove"
+                    - generic [ref=f1e458]:
+                      - text: /tags
+                      - text: "/{id}"
+                - generic "Copy to clipboard"
+                - button "authorization button unlocked" [ref=f1e461]:
+                  - img [ref=f1e462]
+                - 'button "delete /tags/{id}" [ref=f1e464]':
+                  - img [ref=f1e465]
+          - generic [ref=f1e468]:
+            - heading "Imports Collapse operation" [level=3] [ref=f1e469] [cursor=pointer]:
+              - link "Imports" [ref=f1e470]:
+                - /url: "#/Imports"
+              - button "Collapse operation" [expanded] [ref=f1e471]:
+                - img [ref=f1e472]
+            - generic [ref=f1e475]:
+              - generic [ref=f1e478] [cursor=pointer]:
+                - button "POST /imports" [ref=f1e479]:
+                  - generic [ref=f1e480]: POST
+                  - link "/imports" [ref=f1e483]:
+                    - /url: "#/Imports/ImportsController_importFile"
+                - generic "Copy to clipboard"
+                - button "authorization button unlocked" [ref=f1e486]:
+                  - img [ref=f1e487]
+                - button "post /imports" [ref=f1e489]:
+                  - img [ref=f1e490]
+              - generic [ref=f1e494] [cursor=pointer]:
+                - button "GET /imports" [ref=f1e495]:
+                  - generic [ref=f1e496]: GET
+                  - link "/imports" [ref=f1e499]:
+                    - /url: "#/Imports/ImportsController_findAll"
+                - generic "Copy to clipboard"
+                - button "authorization button unlocked" [ref=f1e502]:
+                  - img [ref=f1e503]
+                - button "get /imports" [ref=f1e505]:
+                  - img [ref=f1e506]
+              - generic [ref=f1e510] [cursor=pointer]:
+                - 'button "GET /imports/{id}" [ref=f1e511]':
+                  - generic [ref=f1e512]: GET
+                  - 'link "/imports/{id}" [ref=f1e515]':
+                    - /url: "#/Imports/ImportsController_findOne"
+                    - generic [ref=f1e516]:
+                      - text: /imports
+                      - text: "/{id}"
+                - generic "Copy to clipboard"
+                - button "authorization button unlocked" [ref=f1e519]:
+                  - img [ref=f1e520]
+                - 'button "get /imports/{id}" [ref=f1e522]':
+                  - img [ref=f1e523]
+              - generic [ref=f1e527] [cursor=pointer]:
+                - button "POST /mapping-templates" [ref=f1e528]:
+                  - generic [ref=f1e529]: POST
+                  - link "/mapping-templates" [ref=f1e532]:
+                    - /url: "#/Imports/ImportsController_createTemplate"
+                - generic "Copy to clipboard"
+                - button "authorization button unlocked" [ref=f1e535]:
+                  - img [ref=f1e536]
+                - button "post /mapping-templates" [ref=f1e538]:
+                  - img [ref=f1e539]
+              - generic [ref=f1e543] [cursor=pointer]:
+                - button "GET /mapping-templates" [ref=f1e544]:
+                  - generic [ref=f1e545]: GET
+                  - link "/mapping-templates" [ref=f1e548]:
+                    - /url: "#/Imports/ImportsController_findAllTemplates"
+                - generic "Copy to clipboard"
+                - button "authorization button unlocked" [ref=f1e551]:
+                  - img [ref=f1e552]
+                - button "get /mapping-templates" [ref=f1e554]:
+                  - img [ref=f1e555]
+              - generic [ref=f1e559] [cursor=pointer]:
+                - 'button "DELETE /mapping-templates/{id}" [ref=f1e560]':
+                  - generic [ref=f1e561]: DELETE
+                  - 'link "/mapping-templates/{id}" [ref=f1e564]':
+                    - /url: "#/Imports/ImportsController_deleteTemplate"
+                    - generic [ref=f1e565]:
+                      - text: /mapping-templates
+                      - text: "/{id}"
+                - generic "Copy to clipboard"
+                - button "authorization button unlocked" [ref=f1e568]:
+                  - img [ref=f1e569]
+                - 'button "delete /mapping-templates/{id}" [ref=f1e571]':
+                  - img [ref=f1e572]
+        - generic [ref=f1e576]:
+          - heading "Schemas" [level=4] [ref=f1e577] [cursor=pointer]:
+            - button "Schemas" [expanded] [ref=f1e578]:
+              - generic [ref=f1e579]: Schemas
+              - img [ref=f1e580]
+          - generic [ref=f1e582]:
+            - button "CreateTradeDto" [ref=f1e585] [cursor=pointer]:
+              - generic [ref=f1e587]: CreateTradeDto
+            - button "UpdateTradeDto" [ref=f1e591] [cursor=pointer]:
+              - generic [ref=f1e593]: UpdateTradeDto
+            - button "PresignRequestDto" [ref=f1e597] [cursor=pointer]:
+              - generic [ref=f1e599]: PresignRequestDto
+            - button "ConfirmScreenshotDto" [ref=f1e603] [cursor=pointer]:
+              - generic [ref=f1e605]: ConfirmScreenshotDto
+            - button "CreateStrategyDto" [ref=f1e609] [cursor=pointer]:
+              - generic [ref=f1e611]: CreateStrategyDto
+            - button "UpdateStrategyDto" [ref=f1e615] [cursor=pointer]:
+              - generic [ref=f1e617]: UpdateStrategyDto
+            - button "CreateTagDto" [ref=f1e621] [cursor=pointer]:
+              - generic [ref=f1e623]: CreateTagDto
+            - button "UpdateTagDto" [ref=f1e627] [cursor=pointer]:
+              - generic [ref=f1e629]: UpdateTagDto
+            - button "CreateMappingTemplateDto" [ref=f1e633] [cursor=pointer]:
+              - generic [ref=f1e635]: CreateMappingTemplateDto
