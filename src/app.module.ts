@@ -10,6 +10,7 @@ import { TradesModule } from './modules/trades/trades.module';
 import { StrategiesModule } from './modules/strategies/strategies.module';
 import { TagsModule } from './modules/tags/tags.module';
 import { ImportsModule } from './modules/imports/imports.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { ImportsModule } from './modules/imports/imports.module';
     StrategiesModule,
     TagsModule,
     ImportsModule,
+    AnalyticsModule,
   ],
   providers: [
     // Global rate-limit guard

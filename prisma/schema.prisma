@@ -164,6 +164,17 @@ model TradeScreenshot {
   @@index([tradeId])
 }
 
+// ─── Phase 3: Portfolio Dashboard & Analytics ───────────
+
+model DailySummary {
+  userId      String
+  date        DateTime
+  tradesCount Int
+  netPnl      Decimal
+
+  @@id([userId, date])
+}
+
 // ─── Phase 2.5: SnapTrade Foundation ────────────────────
 
 model BrokerageConnection {

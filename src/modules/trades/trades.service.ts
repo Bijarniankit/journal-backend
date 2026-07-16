@@ -7,6 +7,58 @@ import { Prisma } from '@prisma/client';
 export class TradesService {
   constructor(private prisma: PrismaService) {}
 
+  async recomputeDailySummary(userId: string, date: Date) {
+    const startOfDay = new Date(date);
+    startOfDay.setUTCHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(date);
+    endOfDay.setUTCHours(23, 59, 59, 999);
+
+    const trades = await this.prisma.trade.findMany({
+      where: {
+        userId,
+        openedAt: {
+          gte: startOfDay,
+          lte: endOfDay,
+        },
+      },
+    });
+
+    const tradesCount = trades.length;
+    const netPnl = trades.reduce(
+      (sum, t) => sum + (t.netPnlBase ? t.netPnlBase.toNumber() : 0),
+      0,
+    );
+
+    if (tradesCount === 0) {
+      await this.prisma.dailySummary.deleteMany({
+        where: {
+          userId,
+          date: startOfDay,
+        },
+      });
+    } else {
+      await this.prisma.dailySummary.upsert({
+        where: {
+          userId_date: {
+            userId,
+            date: startOfDay,
+          },
+        },
+        update: {
+          tradesCount,
+          netPnl,
+        },
+        create: {
+          userId,
+          date: startOfDay,
+          tradesCount,
+          netPnl,
+        },
+      });
+    }
+  }
+
   computeMetrics(
     entryPrice: number,
     quantity: number,
@@ -66,7 +118,7 @@ export class TradesService {
         tag: { connect: { id: tagId } },
       })) || [];
 
-    return this.prisma.trade.create({
+    const trade = await this.prisma.trade.create({
       data: {
         userId,
         symbol: dto.symbol,
@@ -93,6 +145,10 @@ export class TradesService {
       },
       include: { strategy: true, tags: { include: { tag: true } } },
     });
+
+    await this.recomputeDailySummary(userId, trade.openedAt);
+
+    return trade;
   }
 
   async findAll(userId: string, query: TradeQueryDto) {
@@ -167,7 +223,8 @@ export class TradesService {
       };
     }
 
-    return this.prisma.trade.update({
+    const oldDate = existing.openedAt;
+    const updatedTrade = await this.prisma.trade.update({
       where: { id },
       data: {
         ...(dto.symbol && { symbol: dto.symbol }),
@@ -192,12 +249,22 @@ export class TradesService {
       },
       include: { strategy: true, tags: { include: { tag: true } } },
     });
+
+    await this.recomputeDailySummary(userId, oldDate);
+    if (updatedTrade.openedAt.getTime() !== oldDate.getTime()) {
+      await this.recomputeDailySummary(userId, updatedTrade.openedAt);
+    }
+
+    return updatedTrade;
   }
 
   async remove(userId: string, id: string) {
-    await this.findOne(userId, id);
-    return this.prisma.trade.delete({
+    const existing = await this.findOne(userId, id);
+    const result = await this.prisma.trade.delete({
       where: { id },
     });
+    
+    await this.recomputeDailySummary(userId, existing.openedAt);
+    return result;
   }
 }
