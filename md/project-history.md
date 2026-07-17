@@ -90,7 +90,69 @@ extra Implementation Detail: """"
 
 ---
 
-## 🟡 Next Up: Phase 4 (Analytics Dashboard Visuals / Strategy Analysis)
+## 🟢 Phase 4: Analytics Dashboard — Performance Metrics
+**Status:** Completed
+
+### Core Implementation (as per backend-plan.md)
+
+- **Performance Metrics Endpoint:**
+  - Implemented `getPerformanceMetrics()` in `AnalyticsService` (`src/modules/analytics/analytics.service.ts`).
+  - Exposed via `GET /analytics/performance?range=`.
+  - **Metrics computed (all in base currency via `netPnlBase`):**
+    - `winRate = wins / totalClosedTrades`
+    - `profitFactor = sum(winning netPnlBase) / abs(sum(losing netPnlBase))`
+    - `expectancy = (winRate × avgWin) − ((1 − winRate) × avgLoss)`
+    - `avgWin`, `avgLoss`, `largestWin`, `largestLoss`
+    - `avgPlannedRiskReward` + `tradesWithPlannedRR` — average R:R computed only over trades that actually had Stop Loss / Take Profit set; the sample size is exposed alongside so the UI can contextualize it.
+    - `consecutiveWins` / `consecutiveLosses` — single-pass streak scan over trades ordered by `closedAt ASC` in application code.
+  - All monetary aggregation exclusively uses `netPnlBase` (base-currency-normalized P&L) as specified in the plan.
+
+- **Automated Testing:**
+  - Created `analytics.performance.spec.ts` with 10 hand-built fixture test cases covering: zero trades, all wins, all losses, mixed trades, streak detection with breakevens, partial R:R data, and profit factor edge cases.
+  - **All 39 unit tests pass. Build compiles cleanly.**
+
+---
+
+### ⭐ Extra Implementation Details (beyond backend-plan.md)
+
+These are features and design decisions we added **on top** of the original plan. Each one explains WHY it exists, WHERE it lives in the backend, HOW it affects the frontend, and WHERE/HOW to implement it in the frontend.
+
+#### 1. `includeOpen` Toggle — Open/Closed Trade Filter
+
+- **WHY:** The original plan specifies `totalClosedTrades`, implying only closed trades count. But the user requested a frontend checkbox to optionally include open (active) trades in the performance calculations. By default, including open trades would skew metrics because their `netPnlBase` might not be finalized yet (no exit price). So we default to closed-only but expose a toggle.
+- **WHERE in the backend:** The `getPerformanceMetrics()` method in `AnalyticsService` accepts an optional `includeOpen: boolean` parameter (defaults to `false`). When `false`, the Prisma query adds filters: `closedAt: { not: null }` and `netPnlBase: { not: null }`, ensuring only fully settled trades contribute to the statistics. The `AnalyticsController` reads `includeOpen` from the query string and converts the string `'true'` to a boolean.
+- **HOW it affects the frontend:** The frontend can toggle between "strict" performance mode (default, recommended) and "inclusive" mode.
+- **WHERE to implement in the frontend:**
+  1. **Analytics Dashboard Page:** Add a toggle/checkbox labeled "Include Open Trades" (default: unchecked).
+  2. **API Call:** When unchecked → `GET /analytics/performance?range=this_month`. When checked → `GET /analytics/performance?range=this_month&includeOpen=true`.
+  3. **UX Tip:** When the checkbox is checked, consider showing a subtle warning badge: "⚠️ Includes unrealized P&L" so the user knows the numbers might shift when trades close.
+
+#### 2. Breakeven Trade Streak Behaviour
+
+- **WHY:** The original plan mentions `consecutiveWins` / `consecutiveLosses` but does not specify what happens when a trade has exactly `netPnlBase = 0` (a breakeven). We decided that a breakeven trade **resets both streaks**, because a breakeven is neither a win nor a loss — it interrupts the momentum in either direction. This is the standard convention in professional trading journals.
+- **WHERE in the backend:** In the `for` loop inside `getPerformanceMetrics()`, the `else` branch (when `pnl === 0`) sets both `currentWinStreak = 0` and `currentLossStreak = 0`.
+- **HOW it affects the frontend:** No special handling needed. The frontend just displays the `consecutiveWins` and `consecutiveLosses` numbers as-is. However, if you want to provide more detail in the future, you could add a tooltip: "Breakeven trades reset both streaks."
+- **WHERE to implement in the frontend:** Display as stat cards on the dashboard: "🔥 Longest Win Streak: 7" / "❄️ Longest Loss Streak: 3".
+
+#### 3. Currency Normalization for Foreign Brokers
+
+- **WHY:** A trader in India using a US broker has trades denominated in USD, but their base currency is INR. Without normalization, summing `+$100` and `+₹500` would be mathematically nonsensical. This affects ALL analytics, not just Phase 4 — but Phase 4 is where it matters most because `profitFactor`, `expectancy`, and `avgWin/avgLoss` all aggregate monetary values.
+- **WHERE in the backend:** Every `Trade` record stores:
+  - `currency` — the trade's native currency (e.g., `USD`).
+  - `fxToBase` — the exchange rate at trade time (e.g., `83.5` for USD→INR). Defaults to `1` for same-currency.
+  - `netPnlBase = netPnl × fxToBase` — computed automatically by `computeMetrics()` in `TradesService` on every create/update.
+  - All Phase 4 performance metrics exclusively query `netPnlBase`, so the normalization is invisible and automatic.
+- **HOW it affects the frontend:** The frontend does NOT need to do any currency conversion. All numbers from `/analytics/performance` are already in the user's base currency.
+- **WHERE to implement in the frontend:**
+  1. **Display:** Show all monetary metrics with the user's `baseCurrency` symbol from their Profile (e.g., `₹150.00` for avgWin if baseCurrency is INR).
+  2. **Trade Entry Form:** When the user creates a trade with a foreign currency, you should provide an `fxToBase` field (or auto-fill it from an exchange rate API). If left at `1`, the user is implicitly saying "same currency."
+  3. **Retroactive Fix:** If the user realizes the exchange rate was wrong, they can `PUT /trades/:id` with a corrected `fxToBase`. The `computeMetrics` hook will automatically recalculate `netPnlBase`, and the next call to `/analytics/performance` will reflect the correction — no manual recalculation needed.
+
+---
+
+## 🟡 Next Up: Phase 5 (Calendar, Strategy & Tag Analytics)
 **Status:** Pending
 
-- **TBD:** Begin tracking the next layer of metrics (e.g. strategy performance, tag performance).
+- **Calendar heatmap data:** `GET /analytics/calendar?month=YYYY-MM`.
+- **Group-by-dimension analytics:** Strategy and Tag breakdown with reusable `GroupByDimensionService`.
+
