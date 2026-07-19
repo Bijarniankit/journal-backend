@@ -255,5 +255,24 @@ export class AnalyticsService {
       consecutiveLosses: maxLossStreak,
     };
   }
+
+  async getCalendar(userId: string, from: Date, to: Date) {
+    const dailySummaries = await this.prisma.dailySummary.findMany({
+      where: {
+        userId,
+        date: {
+          gte: from,
+          lte: to,
+        },
+      },
+      orderBy: { date: 'asc' },
+    });
+
+    return dailySummaries.map(d => ({
+      date: d.date.toISOString().split('T')[0], // Extract just the YYYY-MM-DD
+      netPnl: d.netPnl.toNumber(),
+      tradesCount: d.tradesCount,
+    }));
+  }
 }
 

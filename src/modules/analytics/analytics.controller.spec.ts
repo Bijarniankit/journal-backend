@@ -3,6 +3,7 @@ import { AnalyticsController } from './analytics.controller';
 import { AnalyticsService } from './analytics.service';
 import { RangeResolverService } from './range-resolver.service';
 import { PrismaService } from '../../prisma/prisma.service';
+import { GroupByDimensionService } from './group-by-dimension.service';
 
 describe('AnalyticsController', () => {
   let controller: AnalyticsController;
@@ -13,7 +14,8 @@ describe('AnalyticsController', () => {
       providers: [
         { provide: AnalyticsService, useValue: {} },
         { provide: RangeResolverService, useValue: {} },
-        { provide: PrismaService, useValue: {} }
+        { provide: PrismaService, useValue: {} },
+        { provide: GroupByDimensionService, useValue: {} },
       ],
     }).compile();
 

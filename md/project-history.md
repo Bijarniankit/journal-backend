@@ -150,9 +150,51 @@ These are features and design decisions we added **on top** of the original plan
 
 ---
 
-## 🟡 Next Up: Phase 5 (Calendar, Strategy & Tag Analytics)
+## 🟢 Phase 5: Calendar, Strategy & Tag Analytics
+**Status:** Completed
+
+### Core Implementation (as per backend-plan.md)
+
+- **Calendar Heatmap Data:**
+  - Implemented `GET /analytics/calendar` to return day-by-day PnL and trade counts (`{ date, netPnl, tradesCount }`).
+  - Powered directly by the `DailySummary` table for instant performance.
+- **Dimension Grouping Engine:**
+  - Built `GroupByDimensionService` to group trades by relational dimensions.
+  - Exposed via `GET /analytics/by-dimension?dimension=strategy|tag`.
+  - Calculates `winRate`, `tradesCount`, and `netPnl` (base currency) for each group.
+- **Automated Testing:**
+  - Wrote robust unit test suites (`analytics.dimension.spec.ts`, `analytics.calendar.spec.ts`) validating dimension parsing and accurate PnL calculations.
+
+---
+
+### ⭐ Extra Implementation Details (beyond backend-plan.md)
+
+#### 1. Standardized `RangeQueryDto` for Calendar Endpoint
+
+- **WHY:** The original plan specified `GET /analytics/calendar?month=YYYY-MM`. However, since we already built a highly robust, timezone-aware `RangeQueryDto` in Phase 3 (which powers the `summary`, `equity`, and `performance` endpoints), introducing a completely new date-parsing mechanism just for the calendar would create technical debt and inconsistencies in the API surface.
+- **WHERE in the backend:** The `AnalyticsController` for `@Get('calendar')` accepts the standard `RangeQueryDto`. It passes the resolved UTC bounds to `getCalendar()` in `AnalyticsService`.
+- **HOW it affects the frontend:** The frontend can now use identical logic for the calendar heatmap as it uses for the performance dashboard. You can request `range=this_month`, `range=this_year`, or even explicit `from`/`to` ISO strings. 
+- **WHERE to implement in the frontend:** When fetching data for the calendar heatmap, simply append `?range=this_month` or `?range=past_1_year` to the URL.
+
+#### 2. Smart Tag PnL Distribution
+
+- **WHY:** A trade can have *multiple* tags (e.g., `#FOMO` and `#Revenge`). The original plan didn't specify how to attribute PnL when grouping by tag. If a trade made -$100 and had both tags, splitting it (-$50 each) is mathematically incorrect for performance analysis, as the trade *did* lose $100 due to FOMO, and it *also* lost $100 due to Revenge.
+- **WHERE in the backend:** In `GroupByDimensionService.groupByTag()`, we iterate through a trade's tags. If a trade has 3 tags, the trade's *full* `netPnlBase` and a $+1$ `tradesCount` is added to *all three* tag groups independently.
+- **HOW it affects the frontend:** When rendering the Tag performance breakdown (e.g. a bar chart showing "Most Profitable Tags"), the numbers will be highly accurate for isolated tag analysis. Note that the sum of the trades across all tags might exceed the total number of physical trades, which is correct and intended.
+- **WHERE to implement in the frontend:** Simply render the array returned by `GET /analytics/by-dimension?dimension=tag`. No special mathematical handling is needed on the frontend.
+
+#### 3. `includeOpen` Support for Dimensions
+
+- **WHY:** Just like in Phase 4 (Performance), users might want to see how their currently open trades are performing across different strategies.
+- **WHERE in the backend:** Added an optional `includeOpen` boolean to `GET /analytics/by-dimension`. When false, it adds Prisma filters to ensure `closedAt` is not null.
+- **HOW it affects the frontend:** The same toggle used on the Performance page can be applied to the Strategy/Tag breakdown pages.
+
+---
+
+## 🟡 Next Up: Phase 6 (Session, Day/Time Analytics & Heatmaps)
 **Status:** Pending
 
-- **Calendar heatmap data:** `GET /analytics/calendar?month=YYYY-MM`.
-- **Group-by-dimension analytics:** Strategy and Tag breakdown with reusable `GroupByDimensionService`.
+- **Timezone-aware bucketing:** Grouping trades by Asian/London/NY session, Day of Week, and Hour of Day.
+- **Heatmap Matrix:** Returning pivoted data to feed an ECharts heatmap series.
+
 

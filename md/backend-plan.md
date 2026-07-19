@@ -189,9 +189,9 @@ prisma/
 **What.** Calendar aggregation + one generic dimension-grouping layer.
 
 **How.**
-- `GET /analytics/calendar?month=YYYY-MM` — reads `DailySummary` for the month, returns per-day `{ date, netPnl, tradesCount }` (base currency). Feeds the frontend's ECharts calendar-heatmap.
-- `GroupByDimensionService.group(userId, dimension, range)` — one service, parameterized by `dimension: 'strategy' | 'tag'` (and later `'session' | 'dayOfWeek' | 'hour'` in Phase 6 — build the parameterization now so Phase 6 just adds cases). Returns `[{ key, label, tradesCount, winRate, netPnl }]` in base currency. Strategy grouping uses `Trade.strategyId`; tag grouping uses `TradeTag`.
-- `GET /analytics/by-dimension?dimension=strategy|tag&range=`.
+- `GET /analytics/calendar?range=` — reads `DailySummary` for the range, returns per-day `{ date, netPnl, tradesCount }` (base currency). Feeds the frontend's ECharts calendar-heatmap. (Standardized from `month=YYYY-MM` to use `RangeQueryDto` for API consistency).
+- `GroupByDimensionService.group(userId, dimension, range, includeOpen)` — one service, parameterized by `dimension: 'strategy' | 'tag'` (and later `'session' | 'dayOfWeek' | 'hour'` in Phase 6). Returns `[{ key, label, tradesCount, winRate, netPnl }]` in base currency. Strategy grouping uses `Trade.strategyId`; tag grouping uses `TradeTag` (smart distribution: if a trade has multiple tags, its PnL is counted against ALL of its tags for accurate isolated analysis).
+- `GET /analytics/by-dimension?dimension=strategy|tag&range=&includeOpen=true|false`.
 
 **Testing.** Unit test `GroupByDimensionService` for both dimensions against a fixture with a deliberately losing tag (verifies the "which tags lose money" case).
 

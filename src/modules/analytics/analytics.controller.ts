@@ -4,6 +4,8 @@ import { AnalyticsService } from './analytics.service';
 import { RangeResolverService } from './range-resolver.service';
 import { RangeQueryDto } from '../../shared/dto/range.schema';
 import { PrismaService } from '../../prisma/prisma.service';
+import { GroupByDimensionService } from './group-by-dimension.service';
+import { DimensionQueryDto } from '../../shared/dto/dimension.schema';
 
 @ApiTags('Analytics')
 @ApiBearerAuth('supabase-jwt')
@@ -13,6 +15,7 @@ export class AnalyticsController {
     private readonly analyticsService: AnalyticsService,
     private readonly rangeResolver: RangeResolverService,
     private readonly prisma: PrismaService,
+    private readonly groupByDimensionService: GroupByDimensionService,
   ) {}
 
   private async getBounds(userId: string, query: RangeQueryDto) {
@@ -72,6 +75,45 @@ export class AnalyticsController {
     const includeOpenBool = includeOpen === 'true';
     return this.analyticsService.getPerformanceMetrics(
       req.user.id,
+      from,
+      to,
+      includeOpenBool,
+    );
+  }
+
+  @Get('calendar')
+  @ApiOperation({
+    summary: 'Calendar heatmap data',
+    description: 'Returns day-by-day PnL and trade counts for a specific month (or range). Used to feed a GitHub-style calendar heatmap visualization.',
+  })
+  async getCalendar(@Request() req: any, @Query() query: RangeQueryDto) {
+    const { from, to } = await this.getBounds(req.user.id, query);
+    return this.analyticsService.getCalendar(req.user.id, from, to);
+  }
+
+  @Get('by-dimension')
+  @ApiOperation({
+    summary: 'Performance grouped by dimension',
+    description: 'Groups trading performance (win rate, total PnL, trades count) by a specific dimension, such as strategy or tag. Supports range filtering and includeOpen options.',
+  })
+  @ApiQuery({
+    name: 'includeOpen',
+    required: false,
+    type: String,
+    description: 'Set to "true" to include open/active trades in calculations. Defaults to closed trades only.',
+    example: 'false',
+  })
+  async getByDimension(
+    @Request() req: any,
+    @Query() rangeQuery: RangeQueryDto,
+    @Query() dimQuery: DimensionQueryDto,
+    @Query('includeOpen') includeOpen?: string,
+  ) {
+    const { from, to } = await this.getBounds(req.user.id, rangeQuery);
+    const includeOpenBool = includeOpen === 'true';
+    return this.groupByDimensionService.group(
+      req.user.id,
+      dimQuery.dimension,
       from,
       to,
       includeOpenBool,
