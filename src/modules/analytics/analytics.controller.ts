@@ -6,6 +6,8 @@ import { RangeQueryDto } from '../../shared/dto/range.schema';
 import { PrismaService } from '../../prisma/prisma.service';
 import { GroupByDimensionService } from './group-by-dimension.service';
 import { DimensionQueryDto } from '../../shared/dto/dimension.schema';
+import { HeatmapService } from './heatmap.service';
+import { HeatmapQueryDto } from '../../shared/dto/heatmap.schema';
 
 @ApiTags('Analytics')
 @ApiBearerAuth('supabase-jwt')
@@ -16,6 +18,7 @@ export class AnalyticsController {
     private readonly rangeResolver: RangeResolverService,
     private readonly prisma: PrismaService,
     private readonly groupByDimensionService: GroupByDimensionService,
+    private readonly heatmapService: HeatmapService,
   ) {}
 
   private async getBounds(userId: string, query: RangeQueryDto) {
@@ -96,6 +99,10 @@ export class AnalyticsController {
     summary: 'Performance grouped by dimension',
     description: 'Groups trading performance (win rate, total PnL, trades count) by a specific dimension, such as strategy or tag. Supports range filtering and includeOpen options.',
   })
+  @ApiQuery({ name: 'dimension', required: true, type: String, description: 'Dimension to group by (e.g., strategy, tag, session, dayOfWeek, hour)' })
+  @ApiQuery({ name: 'from', required: false, type: String, description: 'Start date (ISO format)' })
+  @ApiQuery({ name: 'to', required: false, type: String, description: 'End date (ISO format)' })
+  @ApiQuery({ name: 'range', required: false, type: String, description: 'Preset range (e.g., today, this_week)' })
   @ApiQuery({
     name: 'includeOpen',
     required: false,
@@ -114,6 +121,39 @@ export class AnalyticsController {
     return this.groupByDimensionService.group(
       req.user.id,
       dimQuery.dimension,
+      from,
+      to,
+      includeOpenBool,
+    );
+  }
+
+  @Get('heatmap')
+  @ApiOperation({
+    summary: 'Performance heatmap matrix',
+    description: 'Returns a 2D matrix of performance for a heatmap visualization (e.g., day of week vs hour of day).',
+  })
+  @ApiQuery({ name: 'type', required: true, type: String, description: 'Heatmap type (e.g., day, session, strategy)' })
+  @ApiQuery({ name: 'from', required: false, type: String, description: 'Start date (ISO format)' })
+  @ApiQuery({ name: 'to', required: false, type: String, description: 'End date (ISO format)' })
+  @ApiQuery({ name: 'range', required: false, type: String, description: 'Preset range (e.g., today, this_week)' })
+  @ApiQuery({
+    name: 'includeOpen',
+    required: false,
+    type: String,
+    description: 'Set to "true" to include open/active trades.',
+    example: 'false',
+  })
+  async getHeatmap(
+    @Request() req: any,
+    @Query() rangeQuery: RangeQueryDto,
+    @Query() heatmapQuery: HeatmapQueryDto,
+    @Query('includeOpen') includeOpen?: string,
+  ) {
+    const { from, to } = await this.getBounds(req.user.id, rangeQuery);
+    const includeOpenBool = includeOpen === 'true';
+    return this.heatmapService.getHeatmap(
+      req.user.id,
+      heatmapQuery.type,
       from,
       to,
       includeOpenBool,

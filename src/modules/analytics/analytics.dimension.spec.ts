@@ -18,6 +18,9 @@ describe('GroupByDimensionService', () => {
             trade: {
               findMany: jest.fn(),
             },
+            profile: {
+              findUnique: jest.fn(),
+            },
           },
         },
       ],
@@ -161,7 +164,80 @@ describe('GroupByDimensionService', () => {
         netPnl: 20,
       });
     });
+    it('should group by dayOfWeek (timezone aware)', async () => {
+    jest.spyOn(prisma.profile, 'findUnique').mockResolvedValue({
+      timezone: 'Asia/Kolkata', // UTC + 5:30
+    } as any);
+
+    jest.spyOn(prisma.trade, 'findMany').mockResolvedValue([
+      {
+        // 2023-10-08 is Sunday
+        // 2023-10-08T20:00:00.000Z is 20:00 UTC Sunday
+        // In Asia/Kolkata, this is 01:30 AM Monday (2023-10-09)
+        openedAt: new Date('2023-10-08T20:00:00.000Z'),
+        netPnlBase: new Decimal(100),
+      } as any,
+    ]);
+
+    const result = await service.group('u1', 'dayOfWeek', new Date('2020-01-01'), new Date('2030-01-01'));
+    
+    expect(result).toHaveLength(1);
+    expect(result[0].key).toBe('1'); // Monday
+    expect(result[0].label).toBe('Monday');
+    expect(result[0].netPnl).toBe(100);
   });
+
+  it('should group by hour (timezone aware)', async () => {
+    jest.spyOn(prisma.profile, 'findUnique').mockResolvedValue({
+      timezone: 'America/New_York', // UTC - 4
+    } as any);
+
+    jest.spyOn(prisma.trade, 'findMany').mockResolvedValue([
+      {
+        // 14:00 UTC -> 10:00 local time
+        openedAt: new Date('2023-10-09T14:30:00.000Z'),
+        netPnlBase: new Decimal(50),
+      } as any,
+    ]);
+
+    const result = await service.group('u1', 'hour', new Date('2020-01-01'), new Date('2030-01-01'));
+    
+    expect(result).toHaveLength(1);
+    expect(result[0].key).toBe('10');
+    expect(result[0].label).toBe('10:00');
+    expect(result[0].netPnl).toBe(50);
+  });
+
+  it('should group by session (absolute UTC)', async () => {
+    jest.spyOn(prisma.profile, 'findUnique').mockResolvedValue(null);
+
+    jest.spyOn(prisma.trade, 'findMany').mockResolvedValue([
+      {
+        // 04:00 UTC -> Asian
+        openedAt: new Date('2023-10-09T04:00:00.000Z'),
+        netPnlBase: new Decimal(10),
+      } as any,
+      {
+        // 14:00 UTC -> London and NY overlap!
+        openedAt: new Date('2023-10-09T14:00:00.000Z'),
+        netPnlBase: new Decimal(20),
+      } as any,
+    ]);
+
+    const result = await service.group('u1', 'session', new Date('2020-01-01'), new Date('2030-01-01'));
+    
+    // Sorts by pnl descending
+    expect(result).toHaveLength(3); // Asian, London, NY
+    
+    const london = result.find(r => r.key === 'london');
+    const ny = result.find(r => r.key === 'new_york');
+    const asian = result.find(r => r.key === 'asian');
+
+    expect(london.netPnl).toBe(20);
+    expect(ny.netPnl).toBe(20);
+    expect(asian.netPnl).toBe(10);
+  });
+});
 
   describe('error handling', () => {
     it('should throw BadRequestException for unknown dimension', async () => {

@@ -3,7 +3,10 @@ import { createZodDto } from 'nestjs-zod';
 
 export const DimensionEnum = z.enum([
   'strategy',
-  'tag'
+  'tag',
+  'session',
+  'dayOfWeek',
+  'hour'
 ]);
 
 export type Dimension = z.infer<typeof DimensionEnum>;

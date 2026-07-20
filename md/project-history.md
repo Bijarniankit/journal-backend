@@ -171,30 +171,62 @@ These are features and design decisions we added **on top** of the original plan
 
 #### 1. Standardized `RangeQueryDto` for Calendar Endpoint
 
-- **WHY:** The original plan specified `GET /analytics/calendar?month=YYYY-MM`. However, since we already built a highly robust, timezone-aware `RangeQueryDto` in Phase 3 (which powers the `summary`, `equity`, and `performance` endpoints), introducing a completely new date-parsing mechanism just for the calendar would create technical debt and inconsistencies in the API surface.
-- **WHERE in the backend:** The `AnalyticsController` for `@Get('calendar')` accepts the standard `RangeQueryDto`. It passes the resolved UTC bounds to `getCalendar()` in `AnalyticsService`.
-- **HOW it affects the frontend:** The frontend can now use identical logic for the calendar heatmap as it uses for the performance dashboard. You can request `range=this_month`, `range=this_year`, or even explicit `from`/`to` ISO strings. 
-- **WHERE to implement in the frontend:** When fetching data for the calendar heatmap, simply append `?range=this_month` or `?range=past_1_year` to the URL.
+- **WHY:** The original plan specified `GET /analytics/calendar?month=YYYY-MM`. However, since we already built a highly robust, timezone-aware `RangeQueryDto` in Phase 3, introducing a new date-parsing mechanism would create technical debt.
+- **WHERE in the backend:** The `AnalyticsController` for `@Get('calendar')` accepts the standard `RangeQueryDto`.
+- **HOW it affects the frontend:** The frontend can use identical logic for the calendar heatmap as the performance dashboard (`?range=this_month`).
 
 #### 2. Smart Tag PnL Distribution
 
-- **WHY:** A trade can have *multiple* tags (e.g., `#FOMO` and `#Revenge`). The original plan didn't specify how to attribute PnL when grouping by tag. If a trade made -$100 and had both tags, splitting it (-$50 each) is mathematically incorrect for performance analysis, as the trade *did* lose $100 due to FOMO, and it *also* lost $100 due to Revenge.
-- **WHERE in the backend:** In `GroupByDimensionService.groupByTag()`, we iterate through a trade's tags. If a trade has 3 tags, the trade's *full* `netPnlBase` and a $+1$ `tradesCount` is added to *all three* tag groups independently.
-- **HOW it affects the frontend:** When rendering the Tag performance breakdown (e.g. a bar chart showing "Most Profitable Tags"), the numbers will be highly accurate for isolated tag analysis. Note that the sum of the trades across all tags might exceed the total number of physical trades, which is correct and intended.
-- **WHERE to implement in the frontend:** Simply render the array returned by `GET /analytics/by-dimension?dimension=tag`. No special mathematical handling is needed on the frontend.
+- **WHY:** A trade can have *multiple* tags. Splitting the PnL (-$50 each for 2 tags on a -$100 trade) is mathematically incorrect for performance analysis.
+- **WHERE in the backend:** In `GroupByDimensionService.groupByTag()`, the trade's *full* `netPnlBase` is added to *all* associated tag groups.
+- **HOW it affects the frontend:** Tag performance breakdowns are highly accurate for isolated analysis.
 
 #### 3. `includeOpen` Support for Dimensions
 
-- **WHY:** Just like in Phase 4 (Performance), users might want to see how their currently open trades are performing across different strategies.
-- **WHERE in the backend:** Added an optional `includeOpen` boolean to `GET /analytics/by-dimension`. When false, it adds Prisma filters to ensure `closedAt` is not null.
-- **HOW it affects the frontend:** The same toggle used on the Performance page can be applied to the Strategy/Tag breakdown pages.
+- **WHY:** Users might want to see how their currently open trades are performing across different strategies.
+- **WHERE in the backend:** Added an optional `includeOpen` boolean to `GET /analytics/by-dimension`.
 
 ---
 
-## 🟡 Next Up: Phase 6 (Session, Day/Time Analytics & Heatmaps)
+## 🟢 Phase 6: Session, Day/Time Analytics & Heatmaps
+**Status:** Completed
+
+### Core Implementation (as per backend-plan.md)
+
+- **Timezone-aware Time Dimensions:** 
+  - Added new grouping dimensions: `'session'`, `'dayOfWeek'`, `'hour'` to `dimension.schema.ts`.
+  - Upgraded `GroupByDimensionService` to be timezone-aware using `date-fns-tz` based on the user's saved timezone from the `Profile` table.
+- **Absolute Session Bucketing:** 
+  - Implemented global UTC session bucketing: Asian (00:00-08:00), London (08:00-16:00), New York (13:00-21:00).
+- **Heatmap Matrix Generation:** 
+  - Created a dedicated `HeatmapService` to pivot aggregated data into a 2D matrix (`{rows, cols, cells}`) for the frontend ECharts component.
+  - Exposed via the `GET /analytics/heatmap` endpoint.
+- **Automated Testing:**
+  - Added `analytics.heatmap.spec.ts` to test 2D matrix logic.
+  - Updated `analytics.dimension.spec.ts` for timezone and session edge cases.
+
+---
+
+### ⭐ Extra Implementation Details (beyond backend-plan.md)
+
+#### 1. Overlapping Session Allocation
+
+- **WHY:** The London session (08:00-16:00 UTC) and New York session (13:00-21:00 UTC) overlap. If a trade occurs at 14:00 UTC, attributing it exclusively to one session corrupts analytics for traders who explicitly trade the "London-NY overlap."
+- **WHERE in the backend:** In both `GroupByDimensionService` and `HeatmapService`, overlapping trades are pushed into *multiple* buckets simultaneously, similar to how Smart Tag PnL works. 
+- **HOW it affects the frontend:** The frontend doesn't need to do any complex overlap logic; the backend handles the duplication so the heatmap displays accurately.
+
+#### 2. Heatmap Type Routing
+
+- **WHY:** A single heatmap endpoint is easier to consume than three separate endpoints. 
+- **WHERE in the backend:** Introduced `HeatmapTypeEnum` (`day`, `session`, `strategy`). The `HeatmapService` dynamically generates the `rows` and `cols` based on the type (e.g., dynamically querying the user's strategy names for `type=strategy`).
+- **HOW it affects the frontend:** The frontend can directly pass the resulting `{rows, cols, cells}` straight into ECharts' dataset, regardless of what `type` the user selected in the UI dropdown.
+
+---
+
+## 🟡 Next Up: Phase 7 (Rules, Goals & Challenges)
 **Status:** Pending
 
-- **Timezone-aware bucketing:** Grouping trades by Asian/London/NY session, Day of Week, and Hour of Day.
-- **Heatmap Matrix:** Returning pivoted data to feed an ECharts heatmap series.
+- **Models:** TradeRule, RuleEvaluation, Goal, Challenge
+- **API:** Rule CRUD and automatic evaluation during Trade updates.
 
 
